@@ -24,7 +24,7 @@
 
 | Layer | Technology |
 | --- | --- |
-| Framework | Next.js 15 (App Router), React 19 |
+| Framework | Next.js 16 (App Router), React 19 |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 + shadcn/ui (Radix primitives) |
 | Components | Lucide React icons, Radix UI (dialog, dropdown, select) |
