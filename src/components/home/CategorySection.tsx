@@ -2,38 +2,49 @@ import Link from "next/link";
 import { Camera, Clapperboard, Mic, Music, Palette, ArrowUpRight } from "lucide-react";
 
 import { SectionHeading } from "@/components/shared/SectionHeading";
+import { STUDIO_CATEGORIES } from "@/lib/types";
 
+/**
+ * `label` is the friendly wording shown on the card;
+ * `value` is the canonical category stored in MongoDB (STUDIO_CATEGORIES).
+ * Keeping them separate means clicking a card always hits a populated filter.
+ */
 const categories = [
   {
-    name: "Photo Studios",
+    label: "Photo Studios",
+    value: STUDIO_CATEGORIES[0], // Photo Studio
     icon: Camera,
     blurb: "Cyc walls, natural light & strobe kits",
     image:
       "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80",
   },
   {
-    name: "Film Stages",
+    label: "Sound Stages",
+    value: STUDIO_CATEGORIES[1], // Film Stage
     icon: Clapperboard,
     blurb: "Pre-lit sets, green screens & grip",
     image:
       "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?auto=format&fit=crop&w=900&q=80",
   },
   {
-    name: "Podcast Lounges",
+    label: "Podcast Rooms",
+    value: STUDIO_CATEGORIES[2], // Podcast Lounge
     icon: Mic,
     blurb: "Treated rooms & broadcast consoles",
     image:
       "https://images.unsplash.com/photo-1587731556938-38755b4803a6?auto=format&fit=crop&w=900&q=80",
   },
   {
-    name: "Music Suites",
+    label: "Music Suites",
+    value: STUDIO_CATEGORIES[3], // Music Suite
     icon: Music,
     blurb: "Isolation booths & analog consoles",
     image:
       "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80",
   },
   {
-    name: "Art Workshops",
+    label: "Art Workshops",
+    value: STUDIO_CATEGORIES[4], // Art Workshop
     icon: Palette,
     blurb: "Messy-friendly benches & kilns",
     image:
@@ -51,10 +62,10 @@ export function CategorySection() {
       />
 
       <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {categories.map(({ name, icon: Icon, blurb, image }) => (
+        {categories.map(({ label, value, icon: Icon, blurb, image }) => (
           <Link
-            key={name}
-            href={`/studios?category=${encodeURIComponent(name)}`}
+            key={value}
+            href={`/studios?category=${encodeURIComponent(value)}`}
             className="group relative flex h-64 flex-col justify-end overflow-hidden rounded-2xl border border-border p-5 transition-all hover:-translate-y-1 hover:border-primary/60 hover:shadow-xl hover:shadow-primary/10"
           >
             <div
@@ -70,7 +81,7 @@ export function CategorySection() {
                 <Icon className="h-5 w-5" />
               </span>
               <h3 className="flex items-center gap-1.5 font-display text-lg font-bold text-white">
-                {name}
+                {label}
                 <ArrowUpRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
               </h3>
               <p className="mt-1 text-sm text-white/70">{blurb}</p>
