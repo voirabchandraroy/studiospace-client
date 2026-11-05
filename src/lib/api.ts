@@ -23,28 +23,22 @@ export const logoutUser = () => axiosInstance.post("/api/auth/logout");
 export const getMe = () => axiosInstance.get<User>("/api/auth/me");
 
 /* ------------------------------ Studios ----------------------------- */
-export const getFeaturedStudios = () =>
-  axiosInstance.get<Studio[]>("/api/studios/featured");
+export const getFeaturedStudios = () => axiosInstance.get<Studio[]>("/studios/featured");
 
 export const getStudios = (params: Record<string, string>) =>
-  axiosInstance.get<{
-    studios: Studio[];
-    total: number;
-    page: number;
-    totalPages: number;
-  }>("/api/studios", { params });
+  axiosInstance.get<Studio[]>("/studios", { params });
 
-export const getMyStudios = () => axiosInstance.get<Studio[]>("/api/studios/mine");
+export const getMyStudios = () => axiosInstance.get<Studio[]>("/studios/mine");
 
-export const getStudioById = (id: string) => axiosInstance.get(`/api/studios/${id}`);
+export const getStudioById = (id: string) => axiosInstance.get(`/studio/${id}`);
 
 export const createStudio = (payload: Partial<Studio>) =>
-  axiosInstance.post("/api/studios", payload);
+  axiosInstance.post("/add-studio", payload);
 
 export const updateStudio = (id: string, payload: Partial<Studio>) =>
-  axiosInstance.patch(`/api/studios/${id}`, payload);
+  axiosInstance.patch(`/studio/${id}`, payload);
 
-export const deleteStudio = (id: string) => axiosInstance.delete(`/api/studios/${id}`);
+export const deleteStudio = (id: string) => axiosInstance.delete(`/studio/${id}`);
 
 /* ------------------------------ Bookings ---------------------------- */
 export const createBooking = (payload: {
@@ -53,25 +47,26 @@ export const createBooking = (payload: {
   startTime: string;
   endTime: string;
   note?: string;
-}) => axiosInstance.post("/api/bookings", payload);
+}) => axiosInstance.post("/add-booking", payload);
 
-export const getMyBookings = () => axiosInstance.get<Booking[]>("/api/bookings/mine");
+export const getMyBookings = () => axiosInstance.get<Booking[]>("/bookings");
 
-export const getHostBookings = () => axiosInstance.get<Booking[]>("/api/bookings/host");
+export const getHostBookings = () =>
+  axiosInstance.get<Booking[]>("/bookings", { params: { host: "true" } });
 
 export const getStudioBookings = (studioId: string) =>
-  axiosInstance.get<Booking[]>(`/api/bookings/studio/${studioId}`);
+  axiosInstance.get<Booking[]>(`/bookings/${studioId}`);
 
 export const updateBookingStatus = (id: string, status: string) =>
-  axiosInstance.patch(`/api/bookings/${id}/status`, { status });
+  axiosInstance.patch(`/booking/${id}`, { status });
 
-export const cancelBooking = (id: string) => axiosInstance.delete(`/api/bookings/${id}`);
+export const cancelBooking = (id: string) => axiosInstance.delete(`/booking/${id}`);
 
 /* ------------------------------ Wishlist ---------------------------- */
-export const getWishlist = () => axiosInstance.get<string[]>("/api/wishlist");
+export const getWishlist = () => axiosInstance.get<string[]>("/wishlist");
 
 export const toggleWishlist = (studioId: string) =>
-  axiosInstance.post<{ saved: boolean; message: string }>("/api/wishlist/toggle", { studioId });
+  axiosInstance.post<{ saved: boolean; message: string }>("/wishlist/toggle", { studioId });
 
 /* --------------------------- Image upload --------------------------- */
 /** Uploads to imgbb and returns the hosted image URL */

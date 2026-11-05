@@ -26,8 +26,8 @@ function WishlistContent() {
           return;
         }
         // Pull the full studio documents for the saved ids
-        const { data: list } = await getStudios({ limit: "100" });
-        setStudios(list.studios.filter((s) => data.includes(s._id)));
+        const { data: list } = await getStudios({});
+        setStudios(list.filter((s) => data.includes(s._id)));
       })
       .catch(() => setStudios([]))
       .finally(() => setLoading(false));

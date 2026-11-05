@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
    * and CORS stay simple in dev, preview and production alike.
    */
   async rewrites() {
-    const api = process.env.SERVER_URL || "http://localhost:5000";
+    const api = process.env.SERVER_URL || "http://localhost:8000";
     return [{ source: "/api/:path*", destination: `${api}/api/:path*` }];
   },
 };

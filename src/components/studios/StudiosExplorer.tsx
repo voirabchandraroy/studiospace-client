@@ -40,11 +40,15 @@ export function StudiosExplorer() {
   const [sort, setSort] = useState("newest");
   const [page, setPage] = useState(1);
 
-  const [studios, setStudios] = useState<Studio[]>([]);
+  const [allStudios, setAllStudios] = useState<Studio[]>([]);
   const [savedIds, setSavedIds] = useState<string[]>([]);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const PAGE_SIZE = 9;
+
+  // The API returns a plain array — paging happens here on the client.
+  const total = allStudios.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const studios = allStudios.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Keep state in sync when coming from a category card on the home page
   useEffect(() => {
@@ -54,15 +58,14 @@ export function StudiosExplorer() {
 
   useEffect(() => {
     setLoading(true);
-    getStudios({ search, category, sort, page: String(page), limit: "9" })
+    getStudios({ search, category, sort })
       .then(({ data }) => {
-        setStudios(data.studios);
-        setTotalPages(data.totalPages || 1);
-        setTotal(data.total);
+        setAllStudios(data);
+        setPage(1);
       })
-      .catch(() => setStudios([]))
+      .catch(() => setAllStudios([]))
       .finally(() => setLoading(false));
-  }, [search, category, sort, page]);
+  }, [search, category, sort]);
 
   useEffect(() => {
     if (!user) return setSavedIds([]);
