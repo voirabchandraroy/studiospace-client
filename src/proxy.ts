@@ -1,32 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-/**
- * Next.js 16 — `proxy.ts` (this file replaced `middleware.ts`).
- * Renamed in v16 to make it clear this is a *network boundary* in front of the
- * app, not general-purpose Express-style middleware. It runs on the Node.js
- * runtime and executes before routes are rendered.
- *
- * Docs: node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md
- *
- * ─────────────────────────────────────────────────────────────────────────────
- * IMPORTANT — this is an OPTIMISTIC check, not the security boundary.
- *
- * Proxy only looks at whether the HTTPOnly `token` cookie *exists* so it can do
- * fast redirects. It does NOT verify the JWT signature, because:
- *   1. a proxy is not an authentication boundary (see CVE-2025-29927), and
- *   2. the real authorisation lives in the Express API — every mutation is
- *      guarded by `verifyToken`, which verifies the signature and returns 401
- *      for missing / invalid / expired tokens (Challenge 1).
- *
- * So the layering is:
- *   proxy.ts        -> cookie present?  → instant redirect (UX only)
- *   PrivateRoute    -> GET /api/auth/me → renders the guarded UI
- *   Express verifyToken -> real signature check → 401 on anything unauthorised
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
-/** Routes that require a signed-in user */
 const PROTECTED_ROUTES = [
   "/dashboard",
   "/add-studio",

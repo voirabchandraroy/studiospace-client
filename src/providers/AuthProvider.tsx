@@ -10,9 +10,8 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { signInWithPopup, signOut as firebaseSignOut } from "firebase/auth";
 
-import { auth, googleProvider, isFirebaseReady } from "@/lib/firebase";
+import { authClient } from "@/lib/auth-client";
 import * as api from "@/lib/api";
 import type { User } from "@/lib/types";
 
@@ -56,6 +55,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
 
+  /**
+   * Google sign-in (better-auth). Clicking the button redirects the browser
+   * to Google; better-auth validates the OAuth round trip and returns the
+   * browser to this same page with `?google=1`.
+   */
+  const loginWithGoogle: AuthContextType["loginWithGoogle"] = async () => {
+    try {
+      const callbackUrl = new URL(window.location.href);
+      callbackUrl.searchParams.set("google", "1");
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: callbackUrl.toString(),
+      });
+      return true;
+    } catch {
+      toast.error("Google sign-in could not start. Try again.");
+      return false;
+    }
+  };
+
+  /**
+   * On every reload, if the URL carries our `?google=1` flag, better-auth
+   * has already finished (or failed) the OAuth round trip. Sync the Google
+   * identity into Express (upsert user + set HTTPOnly JWT cookie), then
+   * strip the flag from the URL.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("google") !== "1") return;
+
+    (async () => {
+      try {
+        const { data: session } = await authClient.getSession();
+        const sessionUser = session?.user as
+          | { name?: string | null; email?: string | null; image?: string | null }
+          | null
+          | undefined;
+
+        if (!sessionUser?.email) {
+          toast.error("Google sign-in did not finish. Please try again.");
+        } else {
+          const { data } = await api.googleLogin({
+            name: sessionUser.name ?? sessionUser.email,
+            email: sessionUser.email,
+            photoURL: sessionUser.image ?? undefined,
+          });
+          setUser(data.user);
+          toast.success(`Signed in as ${data.user.name}`);
+        }
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.message || "Google sign-in failed. Try again."
+        );
+      } finally {
+        url.searchParams.delete("google");
+        window.history.replaceState(null, "", url.toString());
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const register: AuthContextType["register"] = async (payload) => {
     try {
       const { data } = await api.registerUser(payload);
@@ -79,34 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const loginWithGoogle = async () => {
-    if (!isFirebaseReady || !auth || !googleProvider) {
-      toast.error("Google sign-in is not configured yet. Add your Firebase keys to .env.local");
-      return false;
-    }
-
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const fbUser = result.user;
-
-      const { data } = await api.googleLogin({
-        name: fbUser.displayName,
-        email: fbUser.email!,
-        photoURL: fbUser.photoURL,
-      });
-
-      setUser(data.user);
-      toast.success(`Signed in as ${data.user.name}`);
-      return true;
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Google sign-in was cancelled.");
-      return false;
-    }
-  };
-
   const logout = async () => {
     try {
-      if (isFirebaseReady && auth) await firebaseSignOut(auth).catch(() => {});
       await api.logoutUser();
     } finally {
       setUser(null);

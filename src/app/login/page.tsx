@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Aperture, LogIn, Mail, Lock, Eye, EyeOff, KeyRound } from "lucide-react";
@@ -27,10 +27,13 @@ function LoginForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   // Already signed in? Skip the form entirely.
-  if (user) {
-    router.replace(redirectTo);
-    return null;
-  }
+  // Redirect is side-effectful (router navigation) — it belongs in an
+  // effect, never during render (React: "setState-in-render").
+  useEffect(() => {
+    if (user) router.replace(redirectTo);
+  }, [user, router, redirectTo]);
+
+  if (user) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +56,9 @@ function LoginForm() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    const ok = await loginWithGoogle();
+    // Redirects the browser to Google OAuth; returns to this page with ?google=1.
+    await loginWithGoogle();
     setGoogleLoading(false);
-    if (ok) router.push(redirectTo);
   };
 
   const handleForgot = () => {

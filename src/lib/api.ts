@@ -68,21 +68,4 @@ export const getWishlist = () => axiosInstance.get<string[]>("/api/wishlist");
 export const toggleWishlist = (studioId: string) =>
   axiosInstance.post<{ saved: boolean; message: string }>("/api/wishlist/toggle", { studioId });
 
-/* --------------------------- Image upload --------------------------- */
-/** Uploads to imgbb and returns the hosted image URL */
-export const uploadImageToImgbb = async (file: File): Promise<string> => {
-  const key = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
-  if (!key) throw new Error("Image upload key is not configured.");
 
-  const form = new FormData();
-  form.append("image", file);
-
-  const res = await fetch(`https://api.imgbb.com/1/upload?key=${key}`, {
-    method: "POST",
-    body: form,
-  });
-
-  const data = await res.json();
-  if (!data?.success) throw new Error(data?.error?.message || "Image upload failed.");
-  return data.data.url as string;
-};

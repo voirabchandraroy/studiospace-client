@@ -1,0 +1,2 @@
+﻿D:\Ai vedio\files\workspace-01a1ac2d-6a3a-7bd4-a6f4-10007687ed71\studiospace-client\node_modules\next\dist\docs\01-app\03-api-reference\05-config\01-next-config-js\rewrites.md
+D:\Ai vedio\files\workspace-01a1ac2d-6a3a-7bd4-a6f4-10007687ed71\studiospace-client\node_modules\next\dist\docs\02-pages\04-api-reference\04-config\01-next-config-js\rewrites.md

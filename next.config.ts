@@ -8,13 +8,17 @@ const nextConfig: NextConfig = {
   },
 
   /**
-   * Proxy /api/* to the Express backend.
-   * The browser only ever talks to one origin, so cookies (HTTPOnly JWT)
-   * and CORS stay simple in dev, preview and production alike.
+   * Proxy /api/* to the Express backend — EXCEPT /api/better-auth/*, which
+   * is handled by this Next app's own route handler (Google OAuth flow).
+   * Note: `afterFiles` rewrites match BEFORE dynamic routes (see
+   * rewrites.md), so the exclusion must be expressed in the source regex:
+   * everything under /api/ that doesn't start with "better-auth" goes to
+   * Express; anything under /api/better-auth/ falls through to the
+   * app/api/better-auth/[...all]/route.ts handler.
    */
   async rewrites() {
     const api = process.env.SERVER_URL || "http://localhost:8000";
-    return [{ source: "/api/:path*", destination: `${api}/api/:path*` }];
+    return [{ source: "/api/:path((?!better-auth(?:/|$)).*)", destination: `${api}/api/:path*` }];
   },
 };
 

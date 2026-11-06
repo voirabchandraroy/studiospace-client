@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Aperture, UserPlus, Mail, Lock, User, Image as ImageIcon, Check, X, Eye, EyeOff } from "lucide-react";
@@ -32,10 +32,13 @@ export default function RegisterPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
-  if (user) {
-    router.replace("/");
-    return null;
-  }
+  // Already signed in? Skip the form entirely. Redirect is a side effect —
+  // it belongs in an effect, never during render (setState-in-render pattern).
+  useEffect(() => {
+    if (user) router.replace("/");
+  }, [user, router]);
+
+  if (user) return null;
 
   const validatePassword = (value: string) => {
     if (!value) return "Password is required.";
@@ -75,9 +78,9 @@ export default function RegisterPage() {
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
-    const ok = await loginWithGoogle();
+    // Redirects the browser to Google OAuth; returns to this page with ?google=1.
+    await loginWithGoogle();
     setGoogleLoading(false);
-    if (ok) router.push("/");
   };
 
   return (

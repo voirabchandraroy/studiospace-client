@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Save, Plus, Upload, Loader2, Link2, ArrowLeft, Trash2 } from "lucide-react";
+import { Save, Plus, Link2, ArrowLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/providers/AuthProvider";
-import { createStudio, updateStudio, uploadImageToImgbb } from "@/lib/api";
+import { createStudio, updateStudio } from "@/lib/api";
 import { AMENITY_OPTIONS, STUDIO_CATEGORIES, type Studio } from "@/lib/types";
 
 interface FormState {
@@ -63,7 +63,6 @@ export function StudioForm({
 
   const [form, setForm] = useState<FormState>(emptyForm);
   const [submitting, setSubmitting] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   // Pre-fill the form when editing
   useEffect(() => {
@@ -93,23 +92,6 @@ export function StudioForm({
         ? prev.amenities.filter((a) => a !== amenity)
         : [...prev.amenities, amenity],
     }));
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const url = await uploadImageToImgbb(file);
-      set("image", url);
-      toast.success("Image uploaded and attached to this listing.");
-    } catch (error: any) {
-      toast.error(error?.message || "Image upload failed. Paste an image URL instead.");
-    } finally {
-      setUploading(false);
-      e.target.value = "";
-    }
-  };
 
   const addGalleryImage = () => {
     set("gallery", [...form.gallery, ""]);
@@ -277,35 +259,14 @@ export function StudioForm({
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="image">Image URL</Label>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Link2 className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="image"
-                  value={form.image}
-                  onChange={(e) => set("image", e.target.value)}
-                  placeholder="https://…/studio.jpg"
-                  className="pl-10"
-                />
-              </div>
-              <label
-                htmlFor="upload"
-                className="inline-flex h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-border bg-secondary px-4 text-sm font-semibold transition-colors hover:bg-secondary/70"
-              >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Upload className="h-4 w-4" />
-                )}
-                {uploading ? "Uploading…" : "Upload"}
-              </label>
-              <input
-                id="upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-                disabled={uploading}
+            <div className="relative">
+              <Link2 className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="image"
+                value={form.image}
+                onChange={(e) => set("image", e.target.value)}
+                placeholder="https://…/studio.jpg"
+                className="pl-10"
               />
             </div>
           </div>
@@ -402,7 +363,7 @@ export function StudioForm({
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" size="lg" disabled={submitting || uploading}>
+        <Button type="submit" size="lg" disabled={submitting}>
           {submitting ? (
             "Saving…"
           ) : (

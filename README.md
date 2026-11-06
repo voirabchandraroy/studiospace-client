@@ -1,4 +1,4 @@
-# StudioSpace — Client
+﻿# StudioSpace â€” Client
 
 **Peer-to-Peer Creative Workspace & Production Studio Sharing Platform**
 
@@ -11,12 +11,12 @@
 
 ## Website features
 
-- **Hero slider built with Swiper.js** — three cinematic slides with punchy headlines and primary CTAs (`Explore Studios` / `Host Your Space`) that deep-link straight into `/studios`.
-- **Dynamic featured studios** — the six top-rated spaces are fetched from MongoDB with `.limit(6)`, each card showing a category badge, hourly rate, rating badge, location and a *View Details* button.
-- **Full CRUD for studio listings** — create, read, update and delete workspaces through a private `/add-studio` form, `/my-listings` table, `/studios/edit/[id]` pre-filled editor, plus a custom confirmation modal before every delete.
-- **Booking engine with double-booking prevention** — pick a date and time range, see live availability, and get rejected with a clear message if the slot overlaps an already-confirmed reservation.
-- **JWT authentication with HTTPOnly cookies** — register, login and Google sign-in, with protected routes that keep you signed in even after a full page reload on a private URL.
-- **Polished UX everywhere** — light/dark theme toggle, branded skeleton loaders, Sonner toast notifications, a custom illustrated 404 page, friendly empty states, and a downloadable **PDF booking invoice**.
+- **Hero slider built with Swiper.js** â€” three cinematic slides with punchy headlines and primary CTAs (`Explore Studios` / `Host Your Space`) that deep-link straight into `/studios`.
+- **Dynamic featured studios** â€” the six top-rated spaces are fetched from MongoDB with `.limit(6)`, each card showing a category badge, hourly rate, rating badge, location and a *View Details* button.
+- **Full CRUD for studio listings** â€” create, read, update and delete workspaces through a private `/add-studio` form, `/my-listings` table, `/studios/edit/[id]` pre-filled editor, plus a custom confirmation modal before every delete.
+- **Booking engine with double-booking prevention** â€” pick a date and time range, see live availability, and get rejected with a clear message if the slot overlaps an already-confirmed reservation.
+- **JWT authentication with HTTPOnly cookies** â€” register, login and Google sign-in, with protected routes that keep you signed in even after a full page reload on a private URL.
+- **Polished UX everywhere** â€” light/dark theme toggle, branded skeleton loaders, Sonner toast notifications, a custom illustrated 404 page, friendly empty states, and a downloadable **PDF booking invoice**.
 
 ---
 
@@ -30,10 +30,10 @@
 | Components | Lucide React icons, Radix UI (dialog, dropdown, select) |
 | Notifications | Sonner |
 | Slider / Carousel | Swiper.js |
-| Theme | `next-themes` (light ⇄ dark) |
-| Auth | Firebase (Google sign-in) + JWT in an HTTPOnly cookie |
+| Theme | `next-themes` (light â‡„ dark) |
+| Auth | Better Auth (Google sign-in) + JWT in an HTTPOnly cookie |
 | Data fetching | Axios (single instance, `withCredentials: true`) |
-| Forms & validation | React Hook Form–style controlled inputs + Zod-ready validators |
+| Forms & validation | React Hook Formâ€“style controlled inputs + Zod-ready validators |
 | PDF | jsPDF |
 | Hosting | Vercel |
 
@@ -61,16 +61,13 @@ Open **http://localhost:3000**.
 
 | Variable | Required | Notes |
 | --- | --- | --- |
-| `NEXT_PUBLIC_API_URL` | production only | Leave **empty** locally — Next.js proxies `/api/*` to `http://localhost:5000`. Set it to your Render URL when you deploy. |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | for Google login | Firebase Console → Project settings → Web app |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | for Google login | `your-project.firebaseapp.com` |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | for Google login | |
-| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | for Google login | |
-| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | for Google login | |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | for Google login | |
-| `NEXT_PUBLIC_IMGBB_API_KEY` | for image upload | Free key from <https://api.imgbb.com/> |
+| `NEXT_PUBLIC_API_URL` | production only | Leave **empty** locally â€” Next.js proxies `/api/*` to `http://localhost:5000`. Set it to your Render URL when you deploy. |
+| `GOOGLE_CLIENT_ID` | for Google sign-in | Google Cloud Console → Credentials → Web OAuth client |
+| `GOOGLE_CLIENT_SECRET` | for Google sign-in | Same OAuth client — server-side only, never NEXT_PUBLIC |
+| `MONGODB_URI` | for Google sign-in | Same Atlas URI as the backend (Better Auth stores its own collections) |
+| `BETTER_AUTH_SECRET` | for Google sign-in | Random 32+ char hex — `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 
-> Without Firebase keys the app still runs — the Google button simply shows a friendly toast instead of crashing.
+> Google sign-in runs inside this Next app at `/api/better-auth/*` (registered as a separate path, so `/api/auth/*` still reaches Express). In Google Cloud Console create a **Web OAuth 2.0 client** with Authorized JS origin `http://localhost:3000` and Authorized redirect URI `http://localhost:3000/api/better-auth/callback/google`. Until that client ID/secret are set in `.env.local` the Google button shows a friendly 500 message instead of crashing.
 
 ### Build & run
 
@@ -88,7 +85,7 @@ npm run start     # serve the production build
 | Creator / guest | `examiner@studiospace.com` | `Exam@1234` |
 | Studio host | `host@studiospace.com` | `Exam@1234` |
 
-Both accounts can log in with email + password. Google sign-in also works once Firebase keys are configured.
+Both accounts can log in with email + password. Google sign-in also works once Better Auth is configured (see the env table above).
 
 > Password rules enforced on both client and server: minimum 6 characters, at least one uppercase letter, at least one lowercase letter.
 
@@ -98,23 +95,25 @@ Both accounts can log in with email + password. Google sign-in also works once F
 
 ```
 client/
-└── src/
-    ├── app/                     # App Router pages
-    │   ├── page.tsx             # Home (hero, featured, categories, how it works, guarantee)
-    │   ├── studios/             # Explore + details + edit
-    │   ├── login/  register/    # Authentication
-    │   ├── add-studio/          # Create listing (private)
-    │   ├── my-listings/         # Host CRUD table (private)
-    │   ├── my-bookings/         # Guest bookings + PDF invoice (private)
-    │   ├── dashboard/           # Stats + booking requests (private)
-    │   ├── wishlist/            # Saved studios (private)
-    │   ├── about/  how-it-works/  terms/  privacy/
-    │   └── not-found.tsx        # Custom illustrated 404
-    ├── components/
-    │   ├── ui/                  # shadcn/ui primitives
-    │   ├── shared/              # Navbar, Footer, StudioCard, modals, loaders
-    │   ├── home/                # Hero slider, featured, categories, guarantee
-    │   └── studios/             # StudioForm, BookingModal, details, explorer
-    ├── lib/                     # axios instance, API calls, firebase, invoice, utils
-    └── providers/               # ThemeProvider, AuthProvider, Providers
+â””â”€â”€ src/
+    â”œâ”€â”€ app/                     # App Router pages
+    â”‚   â”œâ”€â”€ page.tsx             # Home (hero, featured, categories, how it works, guarantee)
+    â”‚   â”œâ”€â”€ studios/             # Explore + details + edit
+    â”‚   â”œâ”€â”€ login/  register/    # Authentication
+    â”‚   â”œâ”€â”€ add-studio/          # Create listing (private)
+    â”‚   â”œâ”€â”€ my-listings/         # Host CRUD table (private)
+    â”‚   â”œâ”€â”€ my-bookings/         # Guest bookings + PDF invoice (private)
+    â”‚   â”œâ”€â”€ dashboard/           # Stats + booking requests (private)
+    â”‚   â”œâ”€â”€ wishlist/            # Saved studios (private)
+    â”‚   â”œâ”€â”€ about/  how-it-works/  terms/  privacy/
+    â”‚   â””â”€â”€ not-found.tsx        # Custom illustrated 404
+    â”œâ”€â”€ components/
+    â”‚   â”œâ”€â”€ ui/                  # shadcn/ui primitives
+    â”‚   â”œâ”€â”€ shared/              # Navbar, Footer, StudioCard, modals, loaders
+    â”‚   â”œâ”€â”€ home/                # Hero slider, featured, categories, guarantee
+    â”‚   â””â”€â”€ studios/             # StudioForm, BookingModal, details, explorer
+    â”œâ”€â”€ app/api/                # Better Auth handler (/api/better-auth/*)
+    â”œâ”€â”€ lib/                     # axios instance, API calls, Better Auth config, invoice, utils
+    â””â”€â”€ providers/               # ThemeProvider, AuthProvider, Providers
 ```
+
